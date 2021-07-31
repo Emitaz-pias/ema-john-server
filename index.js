@@ -20,11 +20,35 @@ client.connect((err) => {
     .collection(`${process.env.COLLECTION_NAME}`);
   // perform actions on the collection object
   console.log("db connected error is: ", err);
+
+  // inject all data of the application
   app.post("/addProduct", (req, res) => {
     const product = req.body;
     productsCollection
-      .insertOne(product)
+      .insertMany(product)
       .then((result, err) => console.log(result));
+  });
+
+  // get all  products for the shop page
+  app.get("/products", (req, res) => {
+    productsCollection.find({}).toArray((err, docs) => {
+      res.send(docs);
+    });
+  });
+  // get signle product for the product deatails page
+  app.get("/product/:key", (req, res) => {
+    productsCollection.find({ key: req.params.key }).toArray((err, doc) => {
+      res.send(doc[0]);
+    });
+  });
+  // get many product by keys
+  app.post("/productByKeys", (req, res) => {
+    const productKyes = req.body;
+    productsCollection
+      .find({ key: { $in: productKyes } })
+      .toArray((err, docs) => {
+        res.send(docs);
+      });
   });
 });
 
