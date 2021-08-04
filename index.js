@@ -18,6 +18,7 @@ client.connect((err) => {
   const productsCollection = client
     .db(`${process.env.DB_NAME}`)
     .collection(`${process.env.COLLECTION_NAME}`);
+
   // perform actions on the collection object
   console.log("db connected error is: ", err);
 
@@ -35,6 +36,7 @@ client.connect((err) => {
       res.send(docs);
     });
   });
+
   // get signle product for the product deatails page
   app.get("/product/:key", (req, res) => {
     productsCollection.find({ key: req.params.key }).toArray((err, doc) => {
@@ -50,8 +52,21 @@ client.connect((err) => {
         res.send(docs);
       });
   });
+  // place order to the database
 });
-
+client.connect((err) => {
+  const ordersCollection = client
+    .db(`${process.env.DB_NAME}`)
+    .collection(`${process.env.COLLECTION_NAME2}`);
+  console.log("ordersColleciotn err", err);
+  // place order
+  app.post("/addOrder", (req, res) => {
+    const order = req.body;
+    ordersCollection
+      .insertOne(order)
+      .then((result) => res.send(result.insertedCount > 0));
+  });
+});
 app.listen(8080, () => {
   console.log("app listening on port 8080");
 });
